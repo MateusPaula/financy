@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Header } from "./header"
 import * as Form from '@radix-ui/react-form'
 import { Mail, Lock, Eye, EyeOff, UserPlus } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 export function Home() {
   const [showPassword, setShowPassword] = useState(false)
@@ -99,13 +100,12 @@ export function Home() {
 
           <div className="flex flex-col items-center gap-4 w-full max-w-md">
             <p className="text-gray-600">Ainda não tem uma conta?</p>
-            <button
-              type="button"
-              className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-xl border border-gray-300 transition-colors"
-            >
-              <UserPlus size={20} />
-              Criar conta
-            </button>
+              <Link to='/cadastrar-conta'
+                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-xl border border-gray-300 transition-colors"
+              >
+                <UserPlus size={20} />
+                Criar conta
+            </Link>
           </div>
         </div>
       </div>

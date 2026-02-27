@@ -1,6 +1,7 @@
 import * as Form from "@radix-ui/react-form";
 import { Header } from "./header";
 import { UserRound, LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 export function CadastroConta() {
@@ -124,13 +125,13 @@ export function CadastroConta() {
           {/* Criar conta */}
           <div className="flex flex-col items-center gap-4 w-full max-w-md">
             <p className="text-gray-600">Já tem uma conta?</p>
-            <button
-              type="button"
+            <Link
+              to="/"
               className="w-full flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3.5 rounded-xl border border-gray-300 transition-colors"
             >
               <LogIn size={20} />
               Fazer login
-            </button>
+            </Link>
           </div>
         </div>
       </div>
