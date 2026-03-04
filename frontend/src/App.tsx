@@ -4,6 +4,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Home } from "./components/home";
 import { CadastroConta } from './components/cadastro-conta';
 import { Dashboard } from './components/dashboard';
+import { Transacoes } from './components/transacoes';
+import { Categorias } from './components/categorias';
+import { Perfil } from './components/perfil';
 
 export function App() {
   return (
@@ -14,7 +17,9 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/cadastrar-conta" element={<CadastroConta />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        {/* <Route path="/:shortUrl" element={<RedirectHandler />} /> */}
+        <Route path="/transacoes" element={<Transacoes />} />
+        <Route path="/categorias" element={<Categorias />} />
+        <Route path="/perfil" element={<Perfil />} />
         {/* <Route path="/404" element={<PageNotFound />} /> */}
         {/* <Route path="*" element={<PageNotFound />} /> */}
       </Routes>

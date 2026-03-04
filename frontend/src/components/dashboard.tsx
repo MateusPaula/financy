@@ -1,60 +1,15 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Wallet,
   CircleArrowUp,
   CircleArrowDown,
-  Utensils,
-  Fuel,
-  ShoppingCart,
-  PiggyBank,
   ChevronRight,
   Plus,
 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { DashboardHeader } from './dashboard-header'
-
-type CategoryColor = {
-  badge: string
-  iconBg: string
-  iconColor: string
-}
-
-const categoryColors: Record<string, CategoryColor> = {
-  Receita: {
-    badge: 'bg-green-100 text-green-700',
-    iconBg: 'bg-green-100',
-    iconColor: 'text-green-700',
-  },
-  Alimentação: {
-    badge: 'bg-yellow-100 text-yellow-700',
-    iconBg: 'bg-purple-100',
-    iconColor: 'text-purple-700',
-  },
-  Transporte: {
-    badge: 'bg-red-100 text-red-700',
-    iconBg: 'bg-green-100',
-    iconColor: 'text-green-700',
-  },
-  Mercado: {
-    badge: 'bg-orange-100 text-orange-700',
-    iconBg: 'bg-orange-100',
-    iconColor: 'text-orange-700',
-  },
-  Investimento: {
-    badge: 'bg-emerald-100 text-emerald-700',
-    iconBg: 'bg-green-100',
-    iconColor: 'text-green-700',
-  },
-  Entretenimento: {
-    badge: 'bg-pink-100 text-pink-700',
-    iconBg: 'bg-pink-100',
-    iconColor: 'text-pink-700',
-  },
-  Utilidades: {
-    badge: 'bg-gray-100 text-gray-600',
-    iconBg: 'bg-gray-100',
-    iconColor: 'text-gray-600',
-  },
-}
+import { getCategoryStyle, getCategoryIcon } from '../data/categories'
+import { NovaTransacaoDialog } from './nova-transacao-dialog'
 
 type Transaction = {
   name: string
@@ -62,7 +17,6 @@ type Transaction = {
   category: string
   amount: string
   type: 'income' | 'expense'
-  icon: LucideIcon
 }
 
 const transactions: Transaction[] = [
@@ -72,7 +26,6 @@ const transactions: Transaction[] = [
     category: 'Receita',
     amount: 'R$ 4.250,00',
     type: 'income',
-    icon: Wallet,
   },
   {
     name: 'Jantar no Restaurante',
@@ -80,7 +33,6 @@ const transactions: Transaction[] = [
     category: 'Alimentação',
     amount: 'R$ 89,50',
     type: 'expense',
-    icon: Utensils,
   },
   {
     name: 'Posto de Gasolina',
@@ -88,7 +40,6 @@ const transactions: Transaction[] = [
     category: 'Transporte',
     amount: 'R$ 100,00',
     type: 'expense',
-    icon: Fuel,
   },
   {
     name: 'Compras no Mercado',
@@ -96,7 +47,6 @@ const transactions: Transaction[] = [
     category: 'Mercado',
     amount: 'R$ 156,80',
     type: 'expense',
-    icon: ShoppingCart,
   },
   {
     name: 'Retorno de Investimento',
@@ -104,7 +54,6 @@ const transactions: Transaction[] = [
     category: 'Investimento',
     amount: 'R$ 340,25',
     type: 'income',
-    icon: PiggyBank,
   },
 ]
 
@@ -123,6 +72,8 @@ const categories: Category[] = [
 ]
 
 export function Dashboard() {
+  const [showNewTransaction, setShowNewTransaction] = useState(false)
+
   return (
     <div className="min-h-dvh bg-gray-100">
       <DashboardHeader />
@@ -169,19 +120,19 @@ export function Dashboard() {
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                 Transações Recentes
               </span>
-              <button
-                type="button"
-                className="flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-800 transition-colors"
+              <Link
+                to="/transacoes"
+                className="flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-800 hover:underline underline-offset-2 transition-colors cursor-pointer"
               >
                 Ver todas
                 <ChevronRight size={16} />
-              </button>
+              </Link>
             </div>
 
             <div className="px-4 md:px-6">
               {transactions.map(tx => {
-                const colors = categoryColors[tx.category]
-                const Icon = tx.icon
+                const colors = getCategoryStyle(tx.category)
+                const Icon = getCategoryIcon(tx.category)
                 return (
                   <div
                     key={tx.name}
@@ -224,7 +175,8 @@ export function Dashboard() {
             <div className="px-4 md:px-6 py-4 border-t border-gray-100">
               <button
                 type="button"
-                className="flex items-center gap-2 text-sm font-medium text-green-700 hover:text-green-800 transition-colors mx-auto"
+                onClick={() => setShowNewTransaction(true)}
+                className="flex items-center gap-2 text-sm font-medium text-green-700 hover:text-green-800 hover:underline underline-offset-2 transition-colors mx-auto cursor-pointer"
               >
                 <Plus size={16} />
                 Nova transação
@@ -238,18 +190,18 @@ export function Dashboard() {
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                 Categorias
               </span>
-              <button
-                type="button"
-                className="flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-800 transition-colors"
+              <Link
+                to="/categorias"
+                className="flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-800 hover:underline underline-offset-2 transition-colors cursor-pointer"
               >
                 Gerenciar
                 <ChevronRight size={16} />
-              </button>
+              </Link>
             </div>
 
             <div className="px-4 md:px-6 pb-5 md:pb-6">
               {categories.map(cat => {
-                const colors = categoryColors[cat.name]
+                const colors = getCategoryStyle(cat.name)
                 return (
                   <div
                     key={cat.name}
@@ -273,6 +225,11 @@ export function Dashboard() {
           </div>
         </div>
       </main>
+
+      <NovaTransacaoDialog
+        open={showNewTransaction}
+        onClose={() => setShowNewTransaction(false)}
+      />
     </div>
   )
 }

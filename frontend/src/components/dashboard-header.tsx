@@ -32,9 +32,12 @@ export function DashboardHeader() {
             ))}
           </nav>
 
-          <div className="w-10 h-10 rounded-full bg-gray-800 text-white flex items-center justify-center text-sm font-semibold">
+          <Link
+            to="/perfil"
+            className="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-semibold"
+          >
             CT
-          </div>
+          </Link>
         </div>
 
         <nav className="flex md:hidden items-center gap-6 pb-3 -mt-1">
