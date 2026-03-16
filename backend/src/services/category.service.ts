@@ -4,7 +4,7 @@ import type { CreateCategoryInput, UpdateCategoryInput } from '../dtos/input/cat
 export class CategoryService {
   async createCategory(data: CreateCategoryInput, userId: string) {
     return prismaClient.category.create({
-      data: { name: data.name, color: data.color, userId },
+      data: { name: data.name, color: data.color, icon: data.icon, description: data.description, userId },
     })
   }
 
@@ -33,7 +33,7 @@ export class CategoryService {
 
     return prismaClient.category.update({
       where: { id },
-      data: { name: data.name, color: data.color },
+      data: { name: data.name, color: data.color, icon: data.icon, description: data.description },
     })
   }
 

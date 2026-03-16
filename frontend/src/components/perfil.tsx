@@ -1,10 +1,34 @@
 import { useState } from 'react'
-import { User, Mail, LogOut } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useApolloClient, useMutation } from '@apollo/client/react'
+import { toast } from 'sonner'
+import { User, Mail, LogOut, Loader2 } from 'lucide-react'
 import { DashboardHeader } from './dashboard-header'
+import { useAuthStore } from '../stores/auth'
+import { UPDATE_USER } from '../lib/graphql/mutations/auth.mutations'
+import type { User as UserType } from '../types'
 
 export function Perfil() {
-  const [nome, setNome] = useState('Conta teste')
-  const email = 'conta@teste.com'
+  const navigate = useNavigate()
+  const apolloClient = useApolloClient()
+  const user = useAuthStore(s => s.user)
+  const token = useAuthStore(s => s.token)
+  const setAuth = useAuthStore(s => s.setAuth)
+  const logout = useAuthStore(s => s.logout)
+
+  const [nome, setNome] = useState(user?.name ?? '')
+  const email = user?.email ?? ''
+
+  const [updateUser, { loading }] = useMutation<{ updateUser: UserType }>(UPDATE_USER, {
+    onCompleted: (data) => {
+      const updated = data.updateUser
+      if (token) {
+        setAuth(token, updated)
+      }
+      toast.success('Nome atualizado')
+    },
+    onError: (error) => toast.error(error.message),
+  })
 
   const initials = nome
     .split(' ')
@@ -13,13 +37,25 @@ export function Perfil() {
     .toUpperCase()
     .slice(0, 2)
 
+  function handleSave() {
+    if (!nome.trim() || nome === user?.name) return
+    updateUser({ variables: { data: { name: nome } } })
+  }
+
+  function handleLogout() {
+    logout()
+    apolloClient.clearStore()
+    navigate('/')
+  }
+
+  const hasChanges = nome.trim() !== '' && nome !== user?.name
+
   return (
     <div className="min-h-dvh bg-gray-100">
       <DashboardHeader />
 
       <main className="max-w-lg mx-auto px-4 md:px-8 py-6 md:py-8">
         <div className="bg-white border border-gray-300 rounded-xl p-6 md:p-8">
-          {/* Avatar + info */}
           <div className="flex flex-col items-center mb-6">
             <div className="w-16 h-16 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xl font-semibold mb-3">
               {initials}
@@ -30,7 +66,6 @@ export function Perfil() {
 
           <hr className="border-gray-200 mb-6" />
 
-          {/* Form fields */}
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -72,16 +107,19 @@ export function Perfil() {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="mt-6 space-y-3">
             <button
               type="button"
-              className="w-full bg-green-700 hover:bg-green-800 text-white text-sm font-semibold py-3 rounded-xl transition-colors"
+              onClick={handleSave}
+              disabled={!hasChanges || loading}
+              className="w-full bg-green-700 hover:bg-green-800 text-white text-sm font-semibold py-3 rounded-xl transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
             >
+              {loading && <Loader2 size={18} className="animate-spin" />}
               Salvar alterações
             </button>
             <button
               type="button"
+              onClick={handleLogout}
               className="w-full flex items-center justify-center gap-2 border border-gray-300 text-gray-700 text-sm font-medium py-3 rounded-xl hover:bg-gray-50 transition-colors"
             >
               <LogOut size={16} className="text-red-500" />

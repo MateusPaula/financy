@@ -8,6 +8,15 @@ import {
   Home,
   HeartPulse,
   Briefcase,
+  CarFront,
+  Dumbbell,
+  BookOpen,
+  BaggageClaim,
+  Mailbox,
+  ReceiptText,
+  PawPrint,
+  Gift,
+  ToolCase,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -107,6 +116,35 @@ export const categories: CategoryData[] = [
   },
 ]
 
+export const colorStyleMap: Record<string, CategoryStyle> = {
+  green: { badge: 'bg-green-100 text-green-700', iconBg: 'bg-green-100', iconColor: 'text-green-700' },
+  blue: { badge: 'bg-blue-100 text-blue-700', iconBg: 'bg-blue-100', iconColor: 'text-blue-700' },
+  purple: { badge: 'bg-purple-100 text-purple-700', iconBg: 'bg-purple-100', iconColor: 'text-purple-700' },
+  pink: { badge: 'bg-pink-100 text-pink-700', iconBg: 'bg-pink-100', iconColor: 'text-pink-700' },
+  red: { badge: 'bg-red-100 text-red-700', iconBg: 'bg-red-100', iconColor: 'text-red-700' },
+  orange: { badge: 'bg-orange-100 text-orange-700', iconBg: 'bg-orange-100', iconColor: 'text-orange-700' },
+  yellow: { badge: 'bg-yellow-100 text-yellow-700', iconBg: 'bg-yellow-100', iconColor: 'text-yellow-700' },
+}
+
+export const iconMap: Record<string, LucideIcon> = {
+  Briefcase,
+  CarFront,
+  HeartPulse,
+  PiggyBank,
+  ShoppingCart,
+  Ticket,
+  ToolCase,
+  Utensils,
+  PawPrint,
+  Home,
+  Gift,
+  Dumbbell,
+  BookOpen,
+  BaggageClaim,
+  Mailbox,
+  ReceiptText,
+}
+
 export const categoryStyles: Record<string, CategoryStyle> = {
   Receita: {
     badge: 'bg-green-100 text-green-700',
@@ -131,10 +169,12 @@ export const defaultCategoryStyle: CategoryStyle = {
   iconColor: 'text-gray-600',
 }
 
-export function getCategoryStyle(category: string): CategoryStyle {
+export function getCategoryStyle(category: string, color?: string | null): CategoryStyle {
+  if (color && colorStyleMap[color]) return colorStyleMap[color]
   return categoryStyles[category] ?? defaultCategoryStyle
 }
 
-export function getCategoryIcon(category: string): LucideIcon {
+export function getCategoryIcon(category: string, icon?: string | null): LucideIcon {
+  if (icon && iconMap[icon]) return iconMap[icon]
   return categoryIcons[category] ?? Wallet
 }

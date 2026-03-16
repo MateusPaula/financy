@@ -1,11 +1,38 @@
 import { useState } from 'react'
+import { useMutation } from '@apollo/client/react'
+import { useNavigate, Link } from 'react-router-dom'
+import { toast } from 'sonner'
 import { Header } from "./header"
 import * as Form from '@radix-ui/react-form'
-import { Mail, Lock, Eye, EyeOff, UserPlus } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Mail, Lock, Eye, EyeOff, UserPlus, Loader2 } from 'lucide-react'
+import { LOGIN } from '../lib/graphql/mutations/auth.mutations'
+import { useAuthStore } from '../stores/auth'
+import type { AuthOutput } from '../types'
+
+type LoginData = { login: AuthOutput }
 
 export function Home() {
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const navigate = useNavigate()
+  const setAuth = useAuthStore(s => s.setAuth)
+
+  const [login, { loading }] = useMutation<LoginData>(LOGIN, {
+    onCompleted: (data) => {
+      const { token, user } = data.login
+      setAuth(token, user)
+      navigate('/dashboard')
+    },
+    onError: (error) => {
+      toast.error(error.message)
+    },
+  })
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    login({ variables: { data: { email, password } } })
+  }
 
   return (
     <main className="min-h-dvh bg-gray-100 flex flex-col p-4 md:p-8">
@@ -20,7 +47,7 @@ export function Home() {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Fazer login</h1>
           <p className="text-gray-600 mb-8">Entre na sua conta para continuar</p>
 
-          <Form.Root className="w-full max-w-md">
+          <Form.Root className="w-full max-w-md" onSubmit={handleSubmit}>
             <Form.Field name="email" className="mb-6">
               <Form.Label className="block text-gray-700 font-medium mb-2">
                 E-mail
@@ -31,6 +58,8 @@ export function Home() {
                 <Form.Control asChild>
                   <input
                     type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
                     className="w-full pl-14 pr-4 py-3.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                     placeholder="mail@exemplo.com"
                     required
@@ -49,6 +78,8 @@ export function Home() {
                 <Form.Control asChild>
                   <input
                     type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
                     className="w-full pl-14 pr-14 py-3.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                     placeholder="Digite sua senha"
                     required
@@ -85,8 +116,10 @@ export function Home() {
             <Form.Submit asChild>
               <button
                 type="submit"
-                className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3.5 rounded-xl transition-colors mb-8"
+                disabled={loading}
+                className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3.5 rounded-xl transition-colors mb-8 disabled:opacity-60 flex items-center justify-center gap-2"
               >
+                {loading && <Loader2 size={20} className="animate-spin" />}
                 Entrar
               </button>
             </Form.Submit>

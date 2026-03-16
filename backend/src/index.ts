@@ -7,6 +7,7 @@ import { expressMiddleware } from '@as-integrations/express5'
 import { AuthResolver } from './resolvers/auth.resolver.js'
 import { TransactionResolver } from './resolvers/transaction.resolver.js'
 import { CategoryResolver } from './resolvers/category.resolver.js'
+import { UserResolver } from './resolvers/user.resolver.js'
 import { buildContext } from './graphql/context/index.js'
 
 async function bootstrap() {
@@ -22,6 +23,7 @@ async function bootstrap() {
       AuthResolver,
       TransactionResolver,
       CategoryResolver,
+      UserResolver,
     ],
     validate: false,
     emitSchemaFile: './schema.graphql',

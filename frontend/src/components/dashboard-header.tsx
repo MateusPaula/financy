@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import LogoSvg from '../assets/logo.svg'
+import { useAuthStore } from '../stores/auth'
 
 const navItems = [
   { label: 'Dashboard', path: '/dashboard' },
@@ -9,6 +10,16 @@ const navItems = [
 
 export function DashboardHeader() {
   const location = useLocation()
+  const user = useAuthStore(s => s.user)
+
+  const initials = user
+    ? user.name
+        .split(' ')
+        .map(w => w[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : '?'
 
   return (
     <header className="w-full bg-white border-b border-gray-200">
@@ -36,7 +47,7 @@ export function DashboardHeader() {
             to="/perfil"
             className="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-semibold"
           >
-            CT
+            {initials}
           </Link>
         </div>
 

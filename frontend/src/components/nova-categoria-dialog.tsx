@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useMutation } from '@apollo/client/react'
+import { toast } from 'sonner'
 import {
   Briefcase,
   HeartPulse,
@@ -15,15 +17,26 @@ import {
   BaggageClaim,
   Mailbox,
   ReceiptText,
-  ToolCase
-
+  ToolCase,
+  Loader2,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Dialog } from './dialog'
+import { CREATE_CATEGORY, UPDATE_CATEGORY } from '../lib/graphql/mutations/category.mutations'
+import { LIST_CATEGORIES } from '../lib/graphql/queries/category.queries'
+
+type CategoryToEdit = {
+  id: string
+  name: string
+  color?: string | null
+  icon?: string | null
+  description?: string | null
+}
 
 type Props = {
   open: boolean
   onClose: () => void
+  category?: CategoryToEdit | null
 }
 
 type IconOption = {
@@ -50,12 +63,7 @@ const iconOptions: IconOption[] = [
   { name: 'ReceiptText', icon: ReceiptText },
 ]
 
-type ColorOption = {
-  name: string
-  bg: string
-}
-
-const colorOptions: ColorOption[] = [
+const colorOptions = [
   { name: 'green', bg: 'bg-green-600' },
   { name: 'blue', bg: 'bg-blue-600' },
   { name: 'purple', bg: 'bg-purple-600' },
@@ -65,11 +73,41 @@ const colorOptions: ColorOption[] = [
   { name: 'yellow', bg: 'bg-yellow-500' },
 ]
 
-export function NovaCategoriaDialog({ open, onClose }: Props) {
+export function NovaCategoriaDialog({ open, onClose, category }: Props) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [selectedIcon, setSelectedIcon] = useState('')
   const [selectedColor, setSelectedColor] = useState('')
+  const isEditing = !!category
+
+  useEffect(() => {
+    if (category) {
+      setTitle(category.name)
+      setSelectedColor(category.color ?? '')
+      setSelectedIcon(category.icon ?? '')
+      setDescription(category.description ?? '')
+    }
+  }, [category])
+
+  const [createCategory, { loading: creating }] = useMutation(CREATE_CATEGORY, {
+    refetchQueries: [{ query: LIST_CATEGORIES }],
+    onCompleted: () => {
+      toast.success('Categoria criada')
+      handleClose()
+    },
+    onError: (error) => toast.error(error.message),
+  })
+
+  const [updateCategory, { loading: updating }] = useMutation(UPDATE_CATEGORY, {
+    refetchQueries: [{ query: LIST_CATEGORIES }],
+    onCompleted: () => {
+      toast.success('Categoria atualizada')
+      handleClose()
+    },
+    onError: (error) => toast.error(error.message),
+  })
+
+  const loading = creating || updating
 
   function handleClose() {
     setTitle('')
@@ -79,14 +117,30 @@ export function NovaCategoriaDialog({ open, onClose }: Props) {
     onClose()
   }
 
+  function handleSave() {
+    if (!title.trim()) return
+
+    const data = {
+      name: title,
+      color: selectedColor || undefined,
+      icon: selectedIcon || undefined,
+      description: description || undefined,
+    }
+
+    if (isEditing) {
+      updateCategory({ variables: { id: category!.id, data } })
+    } else {
+      createCategory({ variables: { data } })
+    }
+  }
+
   return (
     <Dialog
       open={open}
       onClose={handleClose}
-      title="Nova categoria"
+      title={isEditing ? 'Editar categoria' : 'Nova categoria'}
       subtitle="Organize suas transações com categorias"
     >
-      {/* Title */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1.5">
           Título
@@ -100,7 +154,6 @@ export function NovaCategoriaDialog({ open, onClose }: Props) {
         />
       </div>
 
-      {/* Description */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1.5">
           Descrição
@@ -114,10 +167,8 @@ export function NovaCategoriaDialog({ open, onClose }: Props) {
         />
       </div>
 
-      {/* Optional label */}
       <p className="text-xs text-gray-400 mb-3">Opcional</p>
 
-      {/* Icon picker */}
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Ícone
@@ -144,7 +195,6 @@ export function NovaCategoriaDialog({ open, onClose }: Props) {
         </div>
       </div>
 
-      {/* Color picker */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Cor
@@ -167,11 +217,13 @@ export function NovaCategoriaDialog({ open, onClose }: Props) {
         </div>
       </div>
 
-      {/* Save button */}
       <button
         type="button"
-        className="w-full bg-green-700 hover:bg-green-800 text-white text-sm font-semibold py-3 rounded-xl transition-colors"
+        onClick={handleSave}
+        disabled={loading || !title.trim()}
+        className="w-full bg-green-700 hover:bg-green-800 text-white text-sm font-semibold py-3 rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
       >
+        {loading && <Loader2 size={18} className="animate-spin" />}
         Salvar
       </button>
     </Dialog>

@@ -12,6 +12,12 @@ export class CategoryModel {
   @Field(() => String, { nullable: true })
   color?: string | null
 
+  @Field(() => String, { nullable: true })
+  icon?: string | null
+
+  @Field(() => String, { nullable: true })
+  description?: string | null
+
   @Field(() => String)
   userId!: string
 

@@ -1,11 +1,39 @@
 import * as Form from "@radix-ui/react-form";
+import { useMutation } from "@apollo/client/react";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
 import { Header } from "./header";
-import { UserRound, LogIn, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { UserRound, LogIn, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { REGISTER } from "../lib/graphql/mutations/auth.mutations";
+import { useAuthStore } from "../stores/auth";
+import type { AuthOutput } from "../types";
+
+type RegisterData = { register: AuthOutput };
 
 export function CadastroConta() {
   const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const setAuth = useAuthStore((s) => s.setAuth);
+
+  const [register, { loading }] = useMutation<RegisterData>(REGISTER, {
+    onCompleted: (data) => {
+      const { token, user } = data.register;
+      setAuth(token, user);
+      navigate("/dashboard");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    register({ variables: { data: { name, email, password } } });
+  }
 
   return (
     <main className="min-h-dvh bg-gray-100 flex flex-col p-4 md:p-8">
@@ -24,8 +52,8 @@ export function CadastroConta() {
             Comece a controlar suas finanças ainda hoje
           </p>
 
-          <Form.Root className="w-full max-w-md">
-            <Form.Field name="email" className="mb-6">
+          <Form.Root className="w-full max-w-md" onSubmit={handleSubmit}>
+            <Form.Field name="name" className="mb-6">
               <Form.Label className="block text-gray-700 font-medium mb-2">
                 Nome completo
               </Form.Label>
@@ -35,6 +63,8 @@ export function CadastroConta() {
                 <Form.Control asChild>
                   <input
                     type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     className="w-full pl-14 pr-4 py-3.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                     placeholder="Seu nome completo"
                     required
@@ -53,6 +83,8 @@ export function CadastroConta() {
                 <Form.Control asChild>
                   <input
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-14 pr-4 py-3.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                     placeholder="mail@exemplo.com"
                     required
@@ -71,6 +103,8 @@ export function CadastroConta() {
                 <Form.Control asChild>
                   <input
                     type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-14 pr-14 py-3.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent text-gray-900 placeholder:text-gray-400"
                     placeholder="Digite sua senha"
                     required
@@ -87,30 +121,13 @@ export function CadastroConta() {
               </div>
             </Form.Field>
 
-            <div className="flex items-center justify-between mb-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-600 cursor-pointer"
-                />
-                <span className="text-gray-700 text-sm md:text-base">
-                  Lembrar-me
-                </span>
-              </label>
-
-              <a
-                href="#"
-                className="text-green-700 hover:text-green-800 text-sm md:text-base font-medium transition-colors"
-              >
-                Recuperar senha
-              </a>
-            </div>
-
             <Form.Submit asChild>
               <button
                 type="submit"
-                className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3.5 rounded-xl transition-colors mb-8"
+                disabled={loading}
+                className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3.5 rounded-xl transition-colors mb-8 disabled:opacity-60 flex items-center justify-center gap-2"
               >
+                {loading && <Loader2 size={20} className="animate-spin" />}
                 Cadastrar
               </button>
             </Form.Submit>
@@ -122,7 +139,6 @@ export function CadastroConta() {
             <div className="flex-1 h-px bg-gray-300"></div>
           </div>
 
-          {/* Criar conta */}
           <div className="flex flex-col items-center gap-4 w-full max-w-md">
             <p className="text-gray-600">Já tem uma conta?</p>
             <Link
