@@ -12,6 +12,7 @@ import { DashboardHeader } from './dashboard-header'
 import { getCategoryStyle, getCategoryIcon } from '../data/categories'
 import { NovaCategoriaDialog } from './nova-categoria-dialog'
 import { LIST_CATEGORIES } from '../lib/graphql/queries/category.queries'
+import { LIST_TRANSACTIONS } from '../lib/graphql/queries/transaction.queries'
 import { DELETE_CATEGORY } from '../lib/graphql/mutations/category.mutations'
 import type { Category } from '../types'
 
@@ -23,7 +24,7 @@ export function Categorias() {
   const categoryList = data?.listCategories ?? []
 
   const [deleteCategory] = useMutation(DELETE_CATEGORY, {
-    refetchQueries: [{ query: LIST_CATEGORIES }],
+    refetchQueries: [{ query: LIST_CATEGORIES }, { query: LIST_TRANSACTIONS }],
     onCompleted: () => toast.success('Categoria excluída'),
     onError: (error) => toast.error(error.message),
   })

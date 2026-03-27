@@ -33,10 +33,26 @@ function formatDate(iso: string) {
   return `${day}/${month}/${year}`
 }
 
+const monthNames = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+]
+
+function getPeriodKey(iso: string) {
+  const d = new Date(iso)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+function formatPeriod(key: string) {
+  const [year, month] = key.split('-')
+  return `${monthNames[parseInt(month, 10) - 1]} / ${year}`
+}
+
 export function Transacoes() {
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
+  const [periodFilter, setPeriodFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [showNewTransaction, setShowNewTransaction] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
@@ -65,6 +81,7 @@ export function Transacoes() {
     if (typeFilter === 'income' && tx.type !== 'INCOME') return false
     if (typeFilter === 'expense' && tx.type !== 'EXPENSE') return false
     if (categoryFilter !== 'all' && tx.category.name !== categoryFilter) return false
+    if (periodFilter !== 'all' && getPeriodKey(tx.date) !== periodFilter) return false
     return true
   })
 
@@ -106,6 +123,8 @@ export function Transacoes() {
 
   const categoryNames = categoryList.map(c => c.name)
 
+  const periodOptions = [...new Set(allTransactions.map(tx => getPeriodKey(tx.date)))].sort().reverse()
+
   return (
     <div className="min-h-dvh bg-gray-100">
       <DashboardHeader />
@@ -129,7 +148,7 @@ export function Transacoes() {
         </div>
 
         <div className="bg-white border border-gray-300 rounded-xl p-4 md:p-6 mb-4 md:mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Buscar
@@ -174,6 +193,24 @@ export function Transacoes() {
                 {categoryNames.map((name) => (
                   <option key={name} value={name}>
                     {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Período
+              </label>
+              <select
+                value={periodFilter}
+                onChange={e => handleFilterChange(setPeriodFilter)(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%236b7280%22%20d%3D%22M2%204l4%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_12px_center] bg-no-repeat"
+              >
+                <option value="all">Todos</option>
+                {periodOptions.map((key) => (
+                  <option key={key} value={key}>
+                    {formatPeriod(key)}
                   </option>
                 ))}
               </select>
